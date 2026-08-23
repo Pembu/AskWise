@@ -1,82 +1,76 @@
-function sendMessage() {
-    let messageInput = document.getElementById('message-input');
-    let message = messageInput.value;
-    displayMessage('user', message)
-    
-    // Get the selected function from the dropdown menu
-    let functionSelect = document.getElementById('function-select');
-    let selectedFunction = functionSelect.value;
-    
-    // Send an AJAX request to the Flask API endpoint based on the selected function
-    let xhr = new XMLHttpRequest();
-    let url;
+const chat = document.getElementById('chat-container');
+const input = document.getElementById('message-input');
+const mode = document.getElementById('function-select');
+const send = document.getElementById('send-btn');
+const endpoints = { answer: '/answer', kbanswer: '/kbanswer', search: '/search' };
 
-    switch (selectedFunction) {
-        case 'search':
-            url = '/search';
-            break;
-        case 'kbanswer':
-            url = '/kbanswer';
-            break;
-        case 'answer':
-            url = '/answer';
-            break;
-        default:
-            url = '/answer';
-    }
-    
-    xhr.open('POST', url);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            let response = JSON.parse(xhr.responseText);
-            displayMessage('assistant', response.message);
-        }
-    };
-    xhr.send(JSON.stringify({message: message}));
-    
-    // Clear the input field
-    messageInput.value = '';
+async function sendMessage() {
+  const message = input.value.trim();
+  if (!message || send.disabled) return;
+  displayMessage('user', message);
+  input.value = '';
+  resizeInput();
+  setLoading(true);
+  try {
+    const response = await fetch(endpoints[mode.value] || '/answer', {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message})
+    });
+    if (!response.ok) throw new Error();
+    const data = await response.json();
+    displayMessage('assistant', data.message || 'I could not find an answer.');
+  } catch {
+    displayMessage('assistant', 'Sorry, I ran into a problem. Please try again.');
+  } finally {
+    setLoading(false);
+    input.focus();
+  }
 }
 
 function displayMessage(sender, message) {
-    let chatContainer = document.getElementById('chat-container');
-    let messageDiv = document.createElement('div');
-
-    if (sender === 'assistant') {
-        messageDiv.classList.add('assistant-message');
-        
-        // Create a span for the Chatbot text
-        let chatbotSpan = document.createElement('span');
-        chatbotSpan.innerHTML = "<b>Chatbot:</b> ";
-        messageDiv.appendChild(chatbotSpan);
-        
-        // Append the message to the Chatbot span
-        messageDiv.innerHTML += message;
-    } else {
-        messageDiv.classList.add('user-message');
-
-        let userSpan = document.createElement('span');
-        userSpan.innerHTML = "<b>User:</b> ";
-        messageDiv.appendChild(userSpan);
-        
-        // Append the message to the span
-        messageDiv.innerHTML += message;
-    }
-
-    // Create a timestamp element
-    let timestamp = document.createElement('span');
-    timestamp.classList.add('timestamp');
-    let currentTime = new Date().toLocaleTimeString();
-    timestamp.innerText = " ["+ currentTime+"]";
-    messageDiv.appendChild(timestamp);
-
-    chatContainer.appendChild(messageDiv);
-
-    // Scroll to the bottom of the chat container
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+  document.getElementById('welcome-state')?.remove();
+  const wrapper = document.createElement('article');
+  wrapper.className = `message ${sender}-message`;
+  const avatar = document.createElement('div');
+  avatar.className = 'message-avatar';
+  avatar.textContent = sender === 'assistant' ? 'AW' : 'YOU';
+  const content = document.createElement('div');
+  content.className = 'message-content';
+  const bubble = document.createElement('div');
+  bubble.className = 'message-bubble';
+  bubble.textContent = String(message);
+  const time = document.createElement('time');
+  time.className = 'timestamp';
+  time.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+  content.append(bubble, time);
+  wrapper.append(avatar, content);
+  chat.appendChild(wrapper);
+  chat.scrollTop = chat.scrollHeight;
 }
 
-// Handle button click event
-let sendButton = document.getElementById('send-btn');
-sendButton.addEventListener('click', sendMessage);
+function setLoading(loading) {
+  document.getElementById('typing-indicator')?.remove();
+  send.disabled = loading;
+  mode.disabled = loading;
+  if (!loading) return;
+  const indicator = document.createElement('div');
+  indicator.id = 'typing-indicator';
+  indicator.className = 'message assistant-message';
+  indicator.innerHTML = '<div class="message-avatar">AW</div><div class="message-bubble typing" aria-label="AskWise is typing"><i></i><i></i><i></i></div>';
+  chat.appendChild(indicator);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function resizeInput() {
+  input.style.height = 'auto';
+  input.style.height = `${Math.min(input.scrollHeight, 120)}px`;
+}
+
+send.addEventListener('click', sendMessage);
+input.addEventListener('input', resizeInput);
+input.addEventListener('keydown', event => {
+  if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }
+});
+document.getElementById('clear-btn').addEventListener('click', () => {
+  chat.innerHTML = '<div class="welcome-state" id="welcome-state"><div class="welcome-icon">✦</div><h2>What can I help you explore?</h2><p>Ask a general question, get an answer from your knowledge base, or search its sources.</p></div>';
+  input.focus();
+});

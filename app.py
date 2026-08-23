@@ -1,39 +1,111 @@
+import os
+
+from dotenv import load_dotenv
 from flask import Flask, render_template
 from flask import request, jsonify, abort
 
-from langchain.llms import Cohere
+from langchain_chroma import Chroma
+from langchain_classic.chains import RetrievalQA
+from langchain_cohere import ChatCohere, CohereEmbeddings
+from langchain_core.prompts import ChatPromptTemplate
 
 app = Flask(__name__)
+# Load environment variables from the local .env file.
+load_dotenv()
+
+
+def load_db():
+    """Load the Chroma knowledge base and retrieval QA chain."""
+    try:
+        # Create Cohere embeddings for the stored knowledge-base documents.
+        embeddings = CohereEmbeddings(
+            cohere_api_key=os.environ["COHERE_API_KEY"],
+            model="embed-english-v3.0",
+        )
+        # Open the local Chroma database in the db directory.
+        vectordb = Chroma(
+            persist_directory="db",
+            embedding_function=embeddings,
+        )
+        # Combine retrieved documents with Cohere to answer questions.
+        qa = RetrievalQA.from_chain_type(
+            llm=ChatCohere(cohere_api_key=os.environ["COHERE_API_KEY"]),
+            chain_type="stuff",
+            retriever=vectordb.as_retriever(),
+            return_source_documents=True,
+        )
+        return qa
+    except Exception as error:
+        print("Error initializing QA system:", error)
+        return None
+
+
+qa = load_db()
 
 def answer_from_knowledgebase(message):
-    # TODO: Write your code here
-    return ""
+    """Return an answer generated from relevant knowledge-base documents."""
+    try:
+        # Ask the retrieval QA chain to answer the user's question.
+        res = qa.invoke({"query": message})
+        # Get the documents that support the generated answer.
+        source_docs = res.get('source_documents', [])
+
+        # Do not return an answer when no relevant documents were found.
+        if not source_docs:
+            return "No relevant knowledge found in the database."
+
+        return res['result']
+    except Exception as e:
+        # Return a user-friendly message if retrieval or generation fails.
+        print("Error during QA invocation:", e)
+        return "Sorry, I couldn't retrieve an answer."
 
 def search_knowledgebase(message):
-    # TODO: Write your code here
-    sources = ""
-    return sources
+    """Return source documents relevant to a knowledge-base search."""
+    try:
+        # Retrieve documents relevant to the user's search query.
+        res = qa.invoke({"query": message})
+        source_docs = res.get("source_documents", [])
 
+        if not source_docs:
+            return "No sources found for your query."
+
+        # Format each retrieved document so the user can identify its source.
+        sources = ""
+        for count, source in enumerate(source_docs, 1):
+            sources += f"Source {count}\n{source.page_content}\n"
+        return sources
+    except Exception as error:
+        print("Error during source retrieval:", error)
+        return "Error retrieving sources."
+
+# Generate a response with Cohere.
 def answer_as_chatbot(message):
-    # TODO: Write your code here
-    return ""
+    # Create the chat prompt.
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", "You are a helpful, concise assistant."),
+        ("human", "{message}"),
+    ])
+    # Send the prompt to the Cohere model.
+    response = (prompt | ChatCohere(
+        cohere_api_key=os.environ["COHERE_API_KEY"]
+    )).invoke({"message": message})
+    return response.content
 
 @app.route('/kbanswer', methods=['POST'])
 def kbanswer():
-    # TODO: Write your code here
-    
-    # call answer_from_knowledebase(message)
-        
-    # Return the response as JSON
-    return 
+    # Read the user's question and answer it from the knowledge base.
+    message = request.json["message"]
+    response_message = answer_from_knowledgebase(message)
+    # Return the answer in the format expected by the frontend.
+    return jsonify({"message": response_message}), 200
 
 @app.route('/search', methods=['POST'])
 def search():    
-    # Search the knowledgebase and generate a response
-    # (call search_knowledgebase())
-    
-    # Return the response as JSON
-    return
+    # Search the knowledge base and return the matching source documents.
+    message = request.json["message"]
+    response_message = search_knowledgebase(message)
+    return jsonify({"message": response_message}), 200
 
 @app.route('/answer', methods=['POST'])
 def answer():

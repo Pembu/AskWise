@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">AskWise logo</title>
+  <defs>
+    <linearGradient id="a" x1="24" y1="18" x2="105" y2="111" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a14cff"/>
+      <stop offset=".52" stop-color="#6537df"/>
+      <stop offset="1" stop-color="#183a9d"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="64" y1="52" x2="64" y2="82" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#65ddf2"/>
+      <stop offset="1" stop-color="#3297ef"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#a)" d="M13 106 54 24c4-9 16-9 21 0l41 82H96L65 42 43 86c7-2 15-2 21 1 8 4 12 11 13 23-6-8-13-10-22-8l-30 7c-9 2-16 0-12-3Z"/>
+  <path fill="url(#spark)" d="M64 54c1 9 5 14 14 16-9 2-13 7-14 16-2-9-6-14-15-16 9-2 13-7 15-16Z"/>
+</svg>

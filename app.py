@@ -1,5 +1,4 @@
 import os
-import time
 
 from dotenv import load_dotenv
 from flask import Flask, render_template
@@ -30,15 +29,9 @@ def load_db():
         )
         # Combine retrieved documents with Cohere to answer questions.
         qa = RetrievalQA.from_chain_type(
-            llm=ChatCohere(
-                cohere_api_key=os.environ["COHERE_API_KEY"],
-                temperature=0,
-            ),
+            llm=ChatCohere(cohere_api_key=os.environ["COHERE_API_KEY"]),
             chain_type="stuff",
-            retriever=vectordb.as_retriever(
-                search_type="similarity",
-                search_kwargs={"k": 2},
-            ),
+            retriever=vectordb.as_retriever(),
             return_source_documents=True,
         )
         return qa
@@ -51,39 +44,20 @@ qa = load_db()
 
 def answer_from_knowledgebase(message):
     """Return an answer generated from relevant knowledge-base documents."""
-    if qa is None:
-        return "The knowledge base is currently unavailable."
-
-    message = message.strip()
-    if not message:
-        return "Please enter a question."
-
-    started = time.perf_counter()
-
     try:
         # Ask the retrieval QA chain to answer the user's question.
         res = qa.invoke({"query": message})
         # Get the documents that support the generated answer.
-        source_docs = res.get("source_documents", [])
-
-        elapsed = time.perf_counter() - started
-        print(
-            f"Knowledge-base request completed in {elapsed:.2f}s",
-            flush=True,
-        )
+        source_docs = res.get('source_documents', [])
 
         # Do not return an answer when no relevant documents were found.
         if not source_docs:
             return "No relevant knowledge found in the database."
 
-        return res.get("result", "No answer was generated.")
-    except Exception as error:
+        return res['result']
+    except Exception as e:
         # Return a user-friendly message if retrieval or generation fails.
-        elapsed = time.perf_counter() - started
-        print(
-            f"Knowledge-base request failed after {elapsed:.2f}s: {error}",
-            flush=True,
-        )
+        print("Error during QA invocation:", e)
         return "Sorry, I couldn't retrieve an answer."
 
 def search_knowledgebase(message):

@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='components.css') }}">
 </head>
 <body>
   <main class="app-shell">
@@ -14,14 +15,23 @@
       <header class="app-header">
         <div class="brand-mark" style="background:transparent;box-shadow:none"><img src="{{ url_for('static', filename='askwise-logo.svg') }}" alt="AskWise logo" width="46" height="46" style="width:100%;height:100%;object-fit:contain"></div>
         <div class="brand-copy"><h1>AskWise</h1><p><span class="status-dot"></span> AI knowledge assistant</p></div>
-        <button id="clear-btn" class="icon-button" type="button" aria-label="Clear conversation" title="Clear conversation"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5"/></svg></button>
+        <button id="clear-btn" class="new-chat-button" type="button" aria-label="Start a new chat" title="Clear this conversation and start a new chat">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <span>New chat</span>
+        </button>
       </header>
       <div id="chat-container" class="chat-container" role="log" aria-live="polite">
         <div class="welcome-state" id="welcome-state"><div class="welcome-icon">✦</div><h2>What can I help you explore?</h2><p>Ask a general question, get an answer from your knowledge base, or search its sources.</p></div>
       </div>
       <div class="composer">
-        <label class="mode-label" for="function-select">Response mode</label>
-        <select id="function-select" class="mode-select"><option value="answer">Chat with AskWise</option><option value="kbanswer">Answer from knowledge base</option><option value="search">Search knowledge base</option></select>
+        <fieldset class="mode-picker">
+          <legend class="mode-label">Response mode</legend>
+          <div class="mode-options">
+            <label><input type="radio" name="response-mode" value="answer" checked><span>Chat</span></label>
+            <label><input type="radio" name="response-mode" value="kbanswer"><span>Ask knowledge base</span></label>
+            <label><input type="radio" name="response-mode" value="search"><span>Search sources</span></label>
+          </div>
+        </fieldset>
         <div class="input-row">
           <label class="sr-only" for="message-input">Your message</label>
           <textarea id="message-input" rows="1" maxlength="2000" placeholder="Ask AskWise anything…"></textarea>
@@ -29,8 +39,8 @@
         </div>
         <p class="composer-hint">Press Enter to send · Shift + Enter for a new line</p>
       </div>
+      <p class="footer-note">AskWise may provide inaccurate information. Please verify important details.</p>
     </section>
-    <p class="footer-note">AskWise can make mistakes. Check important information.</p>
   </main>
   <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>

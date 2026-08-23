@@ -1,6 +1,6 @@
 const chat = document.getElementById('chat-container');
 const input = document.getElementById('message-input');
-const mode = document.getElementById('function-select');
+const modeInputs = [...document.querySelectorAll('input[name="response-mode"]')];
 const send = document.getElementById('send-btn');
 const endpoints = { answer: '/answer', kbanswer: '/kbanswer', search: '/search' };
 
@@ -12,7 +12,8 @@ async function sendMessage() {
   resizeInput();
   setLoading(true);
   try {
-    const response = await fetch(endpoints[mode.value] || '/answer', {
+    const selectedMode = modeInputs.find(option => option.checked)?.value || 'answer';
+    const response = await fetch(endpoints[selectedMode] || '/answer', {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message})
     });
     if (!response.ok) throw new Error();
@@ -50,7 +51,7 @@ function displayMessage(sender, message) {
 function setLoading(loading) {
   document.getElementById('typing-indicator')?.remove();
   send.disabled = loading;
-  mode.disabled = loading;
+  modeInputs.forEach(option => { option.disabled = loading; });
   if (!loading) return;
   const indicator = document.createElement('div');
   indicator.id = 'typing-indicator';

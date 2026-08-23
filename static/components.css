@@ -1,0 +1,152 @@
+.new-chat-button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 13px;
+  color: #5145cc;
+  background: #f3f1ff;
+  border: 1px solid #ddd9ff;
+  border-radius: 12px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.new-chat-button:hover {
+  background: #e9e6ff;
+  border-color: #c7c1ff;
+  transform: translateY(-1px);
+}
+
+.new-chat-button:focus-visible {
+  outline: 3px solid rgba(101, 88, 232, 0.2);
+  outline-offset: 2px;
+}
+
+.new-chat-button svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.mode-picker {
+  min-width: 0;
+  margin: 0 0 11px;
+  padding: 0;
+  border: 0;
+}
+
+.input-row:focus-within {
+  border-color: #9a91f3;
+  box-shadow: 0 0 0 3px rgba(101, 88, 232, 0.1), 0 5px 18px rgba(38, 48, 83, 0.06);
+}
+
+#message-input {
+  padding: 10px 5px;
+}
+
+#message-input:focus {
+  border: 0;
+  box-shadow: none;
+}
+
+.mode-options {
+  display: grid;
+  grid-template-columns: 0.65fr 1.45fr 1fr;
+  gap: 5px;
+  padding: 4px;
+  background: #f3f4f8;
+  border: 1px solid #e4e8f1;
+  border-radius: 13px;
+}
+
+.mode-options label {
+  min-width: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.mode-options input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mode-options span {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 9px;
+  color: #6b7690;
+  border-radius: 9px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.15;
+  transition: 0.18s ease;
+}
+
+.mode-options input:checked + span {
+  color: #5145cc;
+  background: white;
+  box-shadow: 0 2px 8px rgba(39, 48, 89, 0.1);
+}
+
+.mode-options input:focus-visible + span {
+  outline: 3px solid rgba(101, 88, 232, 0.2);
+  outline-offset: 1px;
+}
+
+.mode-options input:disabled + span {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.chat-card > .footer-note {
+  flex: none;
+  margin: 0;
+  padding: 0 16px 12px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+@media (max-width: 640px) {
+  .chat-card > .footer-note {
+    display: block;
+    padding: 0 14px 10px;
+    font-size: 0.68rem;
+    line-height: 1.35;
+  }
+}
+
+@media (max-width: 420px) {
+  .new-chat-button {
+    width: 40px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .new-chat-button span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .mode-options {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .mode-options span {
+    min-height: 42px;
+    padding: 6px 4px;
+    font-size: 0.72rem;
+  }
+}

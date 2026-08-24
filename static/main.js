@@ -2,6 +2,7 @@ const chat = document.getElementById('chat-container');
 const input = document.getElementById('message-input');
 const modeInputs = [...document.querySelectorAll('input[name="response-mode"]')];
 const send = document.getElementById('send-btn');
+const endpoints = { answer: '/answer', kbanswer: '/kbanswer', search: '/search' };
 
 async function sendMessage() {
   const message = input.value.trim();
@@ -11,9 +12,8 @@ async function sendMessage() {
   resizeInput();
   setLoading(true);
   try {
-    const selectedMode = document.querySelector('input[name="response-mode"]:checked');
-    if (!selectedMode?.dataset.endpoint) throw new Error('No response mode selected');
-    const response = await fetch(selectedMode.dataset.endpoint, {
+    const selectedMode = modeInputs.find(option => option.checked)?.value || 'answer';
+    const response = await fetch(endpoints[selectedMode] || '/answer', {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message})
     });
     if (!response.ok) throw new Error();

@@ -1,5 +1,4 @@
 import os
-import time
 
 from dotenv import load_dotenv
 from flask import Flask, render_template
@@ -22,8 +21,6 @@ def load_db():
         embeddings = CohereEmbeddings(
             cohere_api_key=os.environ["COHERE_API_KEY"],
             model="embed-english-v3.0",
-            max_retries=1,
-            request_timeout=25,
         )
         # Open the local Chroma database in the db directory.
         vectordb = Chroma(
@@ -32,16 +29,9 @@ def load_db():
         )
         # Combine retrieved documents with Cohere to answer questions.
         qa = RetrievalQA.from_chain_type(
-            llm=ChatCohere(
-                cohere_api_key=os.environ["COHERE_API_KEY"],
-                temperature=0,
-                timeout_seconds=45,
-            ),
+            llm=ChatCohere(cohere_api_key=os.environ["COHERE_API_KEY"]),
             chain_type="stuff",
-            retriever=vectordb.as_retriever(
-                search_type="similarity",
-                search_kwargs={"k": 2},
-            ),
+            retriever=vectordb.as_retriever(),
             return_source_documents=True,
         )
         return qa
@@ -54,62 +44,28 @@ qa = load_db()
 
 def answer_from_knowledgebase(message):
     """Return an answer generated from relevant knowledge-base documents."""
-    if qa is None:
-        return "The knowledge base is currently unavailable."
-
-    message = message.strip()
-    if not message:
-        return "Please enter a question."
-
-    started = time.perf_counter()
-
     try:
         # Ask the retrieval QA chain to answer the user's question.
         res = qa.invoke({"query": message})
         # Get the documents that support the generated answer.
-        source_docs = res.get("source_documents", [])
-
-        print(
-            f"Knowledge-base answer completed in "
-            f"{time.perf_counter() - started:.2f}s",
-            flush=True,
-        )
+        source_docs = res.get('source_documents', [])
 
         # Do not return an answer when no relevant documents were found.
         if not source_docs:
             return "No relevant knowledge found in the database."
 
-        return res.get("result", "No answer was generated.")
-    except Exception as error:
+        return res['result']
+    except Exception as e:
         # Return a user-friendly message if retrieval or generation fails.
-        print(
-            f"Knowledge-base answer failed after "
-            f"{time.perf_counter() - started:.2f}s: {error}",
-            flush=True,
-        )
+        print("Error during QA invocation:", e)
         return "Sorry, I couldn't retrieve an answer."
 
 def search_knowledgebase(message):
     """Return source documents relevant to a knowledge-base search."""
-    if qa is None:
-        return "The knowledge base is currently unavailable."
-
-    message = message.strip()
-    if not message:
-        return "Please enter a search query."
-
-    started = time.perf_counter()
-
     try:
-        # Search only the retriever. Unlike qa.invoke(), this avoids an
-        # unnecessary Cohere chat-generation request for a source search.
-        source_docs = qa.retriever.invoke(message)
-
-        print(
-            f"Knowledge-base search completed in "
-            f"{time.perf_counter() - started:.2f}s",
-            flush=True,
-        )
+        # Retrieve documents relevant to the user's search query.
+        res = qa.invoke({"query": message})
+        source_docs = res.get("source_documents", [])
 
         if not source_docs:
             return "No sources found for your query."
@@ -120,11 +76,7 @@ def search_knowledgebase(message):
             sources += f"Source {count}\n{source.page_content}\n"
         return sources
     except Exception as error:
-        print(
-            f"Knowledge-base search failed after "
-            f"{time.perf_counter() - started:.2f}s: {error}",
-            flush=True,
-        )
+        print("Error during source retrieval:", error)
         return "Error retrieving sources."
 
 # Generate a response with Cohere.

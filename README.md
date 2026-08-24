@@ -228,7 +228,7 @@ Deploy the app on Render so that it becomes part of your portfolio. Use the foll
 
 1. Build command: `pip install -r requirements.txt`
 
-2. Start command: `gunicorn app:app`
+2. Start command: `gunicorn --config gunicorn.conf.py app:app`
 
 #### 2. Set the `PYTHON_VERSION` and `COHERE_API_KEY` environment variables
 

@@ -28,9 +28,9 @@
         <fieldset class="mode-picker">
           <legend class="mode-label">Response mode</legend>
           <div class="mode-options">
-            <label><input type="radio" name="response-mode" value="answer" checked><span>Chat</span></label>
-            <label><input type="radio" name="response-mode" value="kbanswer"><span>Ask knowledge base</span></label>
-            <label><input type="radio" name="response-mode" value="search"><span>Search sources</span></label>
+            <label for="mode-answer"><input id="mode-answer" type="radio" name="response-mode" value="answer" data-endpoint="{{ url_for('answer') }}" checked><span>Chat</span></label>
+            <label for="mode-kbanswer"><input id="mode-kbanswer" type="radio" name="response-mode" value="kbanswer" data-endpoint="{{ url_for('kbanswer') }}"><span>Ask knowledge base</span></label>
+            <label for="mode-search"><input id="mode-search" type="radio" name="response-mode" value="search" data-endpoint="{{ url_for('search') }}"><span>Search sources</span></label>
           </div>
         </fieldset>
         <div class="input-row">
@@ -43,6 +43,6 @@
       <p class="footer-note">AskWise may provide inaccurate information. Please verify important details.</p>
     </section>
   </main>
-  <script src="{{ url_for('static', filename='main.js') }}"></script>
+  <script src="{{ url_for('static', filename='main.js', v='2') }}"></script>
 </body>
 </html>

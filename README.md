@@ -4,6 +4,16 @@
 > 
 > Your goal is to ensure that the ThinkBot platform is intuitive, functional, and conducive to learning. This will involve developing the necessary tools, designing the user interface, and implementing features such as natural language processing and intelligent responses using LangChain chat prompt templates, generative question answering features, and other applicable techniques.
 
+## Preview
+
+**AskWise** is a retrieval-augmented assistant built with Flask, LangChain, Cohere and Chroma. It has three modes: general chat, answers grounded in a quantum-computing knowledge base, and source search for checking those answers.
+
+![AskWise welcome screen](screenshots/ui_welcome.png)
+
+| Knowledge-base answer (dark mode) | Source search (mobile) |
+|---|---|
+| ![Knowledge-base answer in dark mode](screenshots/ui_knowledge_base_dark.png) | ![Source search on mobile](screenshots/ui_mobile_sources.png) |
+
 ## Existing Files
 
 The most relevant files in the project are the following:
@@ -24,6 +34,7 @@ You will mostly work with the `app.py` and `index.html` files.
 2. Create a Codespace for your project.
 3. GitHub Codespaces will automatically create a fully-configured development environment for your project in the cloud. If you need to install the requirements manually run: `pip install -r requirements.txt`.
 4. To run the app, use the following command: `python app.py`
+   - Optional: add `PORTFOLIO_URL=https://your-site` (and `REPO_URL` to override the GitHub link) to `.env` to show a **Portfolio** link in the sidebar.
 5. To run the tests simply use the following command: `pytest tests/*.py`
 
 > **Tip:** Review the [Github Codespaces documentation](https://docs.github.com/en/codespaces/getting-started/quickstart) if you are unsure on how to run and test your app from Codespaces.

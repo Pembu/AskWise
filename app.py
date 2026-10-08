@@ -119,7 +119,12 @@ def answer():
 
 @app.route("/")
 def index():
-    return render_template("index.html", title="")
+    # Optional links shown in the sidebar; set them in .env for deployment.
+    return render_template(
+        "index.html",
+        repo_url=os.getenv("REPO_URL", "https://github.com/Pembu/AskWise"),
+        portfolio_url=os.getenv("PORTFOLIO_URL"),
+    )
 
 if __name__ == "__main__":
     app.run()
